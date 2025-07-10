@@ -4,9 +4,9 @@
 	Parts that being reused a lot
 	called fully on the 3rd variable
 */
-#define PD 0
-#define PB 8
-#define PC 14
+#define PD 0x25
+#define PB 0x28
+#define PC 0x28
 #define __ATTR_PROGMEM__ __attribute__((__progmem__))
 #define PROGMEM __ATTR_PROGMEM__
 /*
