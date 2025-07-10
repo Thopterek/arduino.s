@@ -1,6 +1,15 @@
 #include "stdint.h"
 
 /*
+	Parts that being reused a lot
+	called fully on the 3rd variable
+*/
+#define PD 0
+#define PB 8
+#define PC 14
+#define __ATTR_PROGMEM__ __attribute__((__progmem__))
+#define PROGMEM __ATTR_PROGMEM__
+/*
 	first variable that is being set
 	uint8_t timer is equal to below
 	the passed P should be beginning var
@@ -126,7 +135,7 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
 /*
 	third variable port using as the ones before the pin
 	starting with predefinition the pgm_read_byte stays the same
-	now adding the digital_pin_port_PGM parts
+	now adding the digital_pin_port_PGM parts those added at top
 */
 const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	PD, /* 0 */
@@ -161,6 +170,8 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
 	that is being called in one of them uses cbi
 	the _BV was already used before in another instance
 */
+#define _SFR_MEM_ADDR(sfr) ((uint16_t) &(sfr))
+#define _SFR_ADDR(sfr) _SFR_MEM_ADDR(sfr)
 #define _MMIO_BYTE(mem_addr) (*(volatile uint8_t *)(mem_addr))
 #define _SFR_BYTE(sfr) _MMIO_BYTE(_SFR_ADDR(sfr))
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -233,6 +244,83 @@ static void turnOffPWM(uint8_t timer)
 		#endif
 	}
 }
+
+/*
+	Starting with putting the code for
+	portOutputRegister(port) the
+	port_to_output_PGM used by it
+*/
+extern const uint16_t PROGMEM port_to_output_PGM[];
+/*
+	LPM that is being used by it
+	port_to_out_PGM would need to be recreated
+	or its something hides from me the logic for it
+*/
+#define __LPM_word_classic__(addr)          \
+(__extension__({                            \
+    uint16_t __addr16 = (uint16_t)(addr);   \
+    uint16_t __result;                      \
+    __asm__ __volatile__                    \
+    (                                       \
+        "lpm"           "\n\t"              \
+        "mov %A0, r0"   "\n\t"              \
+        "adiw r30, 1"   "\n\t"              \
+        "lpm"           "\n\t"              \
+        "mov %B0, r0"   "\n\t"              \
+        : "=r" (__result), "=z" (__addr16)  \
+        : "1" (__addr16)                    \
+        : "r0"                              \
+    );                                      \
+    __result;                               \
+}))
+/*
+	and the definitions chain that gets to it
+	and is being called up with the ft
+*/
+#define __LPM_word(addr)    __LPM_word_classic__(addr)
+#define pgm_read_word_near(address_short) __LPM_word((uint16_t)(address_short))
+#define pgm_read_word(address_short)    pgm_read_word_near(address_short)
+#define portOutputRegister(P) ( (volatile uint8_t *)( pgm_read_word( port_to_output_PGM + (P))) )
+
+/*
+	setting the value of oldSREG
+	by the usage of SREG, _MMIO_BYTE was already used
+	only adding the offset value  rest stay
+*/
+#ifndef __SFR_OFFSET
+#  if __AVR_ARCH__ >= 100
+#    define __SFR_OFFSET 0x00
+#  else
+#    define __SFR_OFFSET 0x20
+#  endif
+#endif
+#define _SFR_IO8(io_addr) _MMIO_BYTE((io_addr) + __SFR_OFFSET)
+#define _SFR_MEM8(mem_addr) _MMIO_BYTE(mem_addr)
+/*
+	I am missing the setting of __AVR_ARCH__
+	value where it is happenig
+*/
+#ifndef SREG
+#  if __AVR_ARCH__ >= 100
+#    define SREG _SFR_MEM8(0x3F)
+#  else
+#    define SREG _SFR_IO8(0x3F)
+#  endif
+#endif
+
+/*
+	cli that is being used afterwards
+	hopefully deep diving is gonna show why
+	for now it just keeps the __asm__
+*/
+#define cli()  __asm__ __volatile__ ("cli" ::: "memory")
+
+/*
+	some simple LOW, just like HIGH
+	that we trying to set
+*/
+#define LOW  0x0
+
 /*
 	for the Arduino uno the base pin values is 13
 	value of val (high) is set as 0x1
