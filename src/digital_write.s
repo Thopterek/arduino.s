@@ -23,9 +23,14 @@ digital_write:
 	mov r10, rax
 	cmp r10, 0
 	je done
+	cmp r8, 0
+	je turn_off
 
 done:
 	xor rax, rax
 	ret
+
+turn_off:
+	
 
 digital_pin_to_timer:
