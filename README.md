@@ -9,3 +9,7 @@ The structure for directories goes as follows:
   * .s and .asm files are my own implemenations of functions in assembly
 
   * .c are reconstructed from inc functions in the original language
+
+Important note for the code inside the inc, it has its own licences I just use it as a reference for lower level deep dive
+
+<h2>TBD</h2>
