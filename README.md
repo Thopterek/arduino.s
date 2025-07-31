@@ -1,5 +1,5 @@
 <img width="1091" height="183" alt="If you" src="https://github.com/user-attachments/assets/6592337f-c342-47f4-9e86-6040024f0880" />
-<h1>Rewriting and creating embedded libraries with Assembly</h1>
+<h1>Rewriting embedded libraries with Assembly</h1>
 The structure for directories goes as follows:
 
 * inc: does are the libraries used for the reference
