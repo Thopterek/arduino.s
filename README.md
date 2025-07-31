@@ -10,6 +10,7 @@ The structure for directories goes as follows:
 
   * .c are reconstructed from inc functions in the original language
 
-Important note for the code inside the inc, it has its own licences I just use it as a reference for lower level deep dive
+Important note for the code inside the inc, it has its own licences I just use it as a reference for lower level deep dive. 
+Thats also why in gitattributes I am omitting those files as they are not written by me or are just mash up for easier readability.
 
 <h2>TBD</h2>
